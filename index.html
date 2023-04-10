@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Books Library App</title>
+</head>
+<body>
+    <h1>Books Library App</h1>
+   
+    <form>
+        <label for="search-query">Search for a Book:</label>
+        <input type="text" id="search-query">
+        <button type="submit" id="search-button">Search</button>
+    </form>
+   
+    <h2>Popular Book Categories:</h2>
+    <ul id="popular-subjects"></ul>
+   
+    <h2>Search Results:</h2>
+    <ul id="search-results"></ul>
+   
+    <script>
+        // Open Library Subjects API 
+        const SUBJECTS_API = "https://openlibrary.org/subjects.json";
+       
+        // Open Library Search API 
+        const SEARCH_API = "https://openlibrary.org/search.json";
+       
+        
+        fetch(SUBJECTS_API)
+            .then(response => response.json())
+            .then(data => {
+                const subjectsList = document.getElementById("popular-subjects");
+                data.forEach(subject => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = subject;
+                    subjectsList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error(error));
+           
+        // Search for books based on a query
+        const searchForm = document.querySelector("form");
+        searchForm.addEventListener("submit", event => {
+            event.preventDefault();
+            const query = document.getElementById("search-query").value;
+            const payload = {q: query};
+            const searchUrl = new URL(SEARCH_API);
+            searchUrl.search = new URLSearchParams(payload);
+           
+            fetch(searchUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const searchResultsList = document.getElementById("search-results");
+                    searchResultsList.innerHTML = "";
+                    data.docs.forEach(book => {
+                        const listItem = document.createElement("li");
+                        const title = document.createElement("h3");
+                        const author = document.createElement("p");
+                        const publicationDate = document.createElement("p");
+                        const summary = document.createElement("p");
+                        title.textContent = book.title;
+                        author.textContent = `Author: ${book.author_name}`;
+                        publicationDate.textContent = `Publication Date: ${book.first_publish_year}`;
+                        summary.textContent = book.subtitle;
+                        listItem.appendChild(title);
+                        listItem.appendChild(author);
+                        listItem.appendChild(publicationDate);
+                        listItem.appendChild(summary);
+                        searchResultsList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error(error));
+        });
+    </script>
+</body>
+</html>
